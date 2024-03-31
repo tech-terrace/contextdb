@@ -1,0 +1,6 @@
+creds.json
+.idea
+venv
+*.txt
+db.sqlite3
+*.pyc
