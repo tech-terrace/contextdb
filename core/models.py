@@ -22,7 +22,7 @@ class Framework(models.Model):
 class Version(models.Model):
     framework = models.ForeignKey(Framework, on_delete=models.CASCADE)
     version_number = models.CharField(max_length=20)
-    release_date = models.DateField()
+    release_date = models.DateField(blank=True, null=True)
 
     class Meta:
         unique_together = ('framework', 'version_number')
