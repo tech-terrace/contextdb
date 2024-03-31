@@ -41,7 +41,7 @@
             "name": "Make Documentation",
             "type": "python",
             "request": "launch",
-            "module": "get_doc_scripts.tools.vuejs.make_doc",
+            "module": "get_doc_scripts.tools.fast-api.make_doc",
             "justMyCode": true
         }
     ]
