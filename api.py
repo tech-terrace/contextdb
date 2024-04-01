@@ -2,7 +2,7 @@ import os
 import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'contextdb.settings')
 django.setup()
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import APIRouter, FastAPI, HTTPException, Query
 from django.conf import settings
 from pydantic import BaseModel, HttpUrl
 from datetime import date
@@ -12,6 +12,7 @@ from django.db.models import Prefetch
 
 
 app = FastAPI()
+api_router = APIRouter(prefix="/api/v1")
 
 class TagModel(BaseModel):
     id: int
@@ -54,13 +55,13 @@ class VersionModel(BaseModel):
         from_attributes = True
 
 
-@app.get("/tags/", response_model=List[TagModel])
+@api_router.get("/tags/", response_model=List[TagModel])
 def list_tags():
     tags = Tag.objects.all()
     return list(tags)
 
 
-@app.get("/frameworks/", response_model=List[FrameworkModel])
+@api_router.get("/frameworks/", response_model=List[FrameworkModel])
 def search_frameworks(name: str = None, tag_ids: List[int] = Query(None)):
     frameworks = Framework.objects.all()
     
@@ -73,7 +74,7 @@ def search_frameworks(name: str = None, tag_ids: List[int] = Query(None)):
     return list(frameworks)
 
 
-@app.get("/versions/{tool_id}/", response_model=List[VersionModel])
+@api_router.get("/versions/{tool_id}/", response_model=List[VersionModel])
 def get_versions_with_variants_and_docs(tool_id: int):
     try:
         framework = Framework.objects.get(id=tool_id)
@@ -110,4 +111,6 @@ def get_versions_with_variants_and_docs(tool_id: int):
         raise HTTPException(status_code=404, detail="No versions found for the given framework")
 
     return version_models
+
+app.include_router(api_router)
 
