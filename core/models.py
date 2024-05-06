@@ -102,3 +102,22 @@ def add_docfile(framework_name, version_number, variant_type, file_name, file):
     # Wrap the standard file object with Django's File class
     django_file = File(file, name=file_name)
     DocFile.objects.create(variant=variant, file_name=file_name, file=django_file)
+
+
+def version_exists(framework_name, version_number):
+    """
+    Checks if the version of a given framework already exists.
+
+    Args:
+        framework_name: The name of the framework.
+        version_number: The version number to check for.
+
+    Returns:
+        True if the version exists, False otherwise.
+    """
+    framework = Framework.objects.get(name=framework_name)
+    try:
+        Version.objects.get(framework=framework, version_number=version_number)
+        return True
+    except Version.DoesNotExist:
+        return False

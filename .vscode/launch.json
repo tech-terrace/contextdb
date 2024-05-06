@@ -41,8 +41,15 @@
             "name": "Make Documentation",
             "type": "python",
             "request": "launch",
-            "module": "get_doc_scripts.tools.fast-api.make_doc",
+            "module": "get_doc_scripts.tools.vuejs.make_doc",
             "justMyCode": true
+        },
+        {
+            "name": "FastAPI: Run API",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}\\api.py",
+            "console": "integratedTerminal"
         }
     ]
 }

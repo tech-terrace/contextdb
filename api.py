@@ -6,9 +6,8 @@ from fastapi import APIRouter, FastAPI, HTTPException, Query
 from django.conf import settings
 from pydantic import BaseModel, HttpUrl
 from datetime import date
-from core.models import Tag, Framework, Version, DocFile
+from core.models import Tag, Framework, Version, DocFile, Variant
 from typing import List, Optional
-from django.db.models import Prefetch
 
 
 app = FastAPI()
@@ -26,6 +25,9 @@ class FrameworkModel(BaseModel):
     id: int
     name: str
     description: str
+    tags: List[TagModel]
+    latest_version: Optional[str] = None
+    latest_doc_file_url: Optional[HttpUrl] = None
 
     class Config:
         from_attributes = True
@@ -71,8 +73,30 @@ def search_frameworks(name: str = None, tag_ids: List[int] = Query(None)):
     if tag_ids:
         frameworks = frameworks.filter(tags__id__in=tag_ids).distinct()
     
-    return list(frameworks)
-
+    framework_models = []
+    for framework in frameworks:
+        latest_version = framework.version_set.order_by('-id').first()
+        latest_doc_file_url = None
+        if latest_version:
+            latest_variant = latest_version.variant_set.first()
+            if latest_variant:
+                latest_doc_file = latest_variant.docfile_set.first()
+                if latest_doc_file:
+                    latest_doc_file_url = latest_doc_file.get_file_url()
+        
+        tag_models = [TagModel(id=tag.id, name=tag.name) for tag in framework.tags.all()]
+        
+        framework_model = FrameworkModel(
+            id=framework.id,
+            name=framework.name,
+            description=framework.description,
+            tags=tag_models,
+            latest_version=latest_version.version_number if latest_version else None,
+            latest_doc_file_url=latest_doc_file_url
+        )
+        framework_models.append(framework_model)
+    
+    return framework_models
 
 @api_router.get("/versions/{tool_id}/", response_model=List[VersionModel])
 def get_versions_with_variants_and_docs(tool_id: int):
@@ -114,3 +138,6 @@ def get_versions_with_variants_and_docs(tool_id: int):
 
 app.include_router(api_router)
 
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8001)
