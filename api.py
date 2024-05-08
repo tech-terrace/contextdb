@@ -4,6 +4,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'contextdb.settings')
 django.setup()
 from fastapi import APIRouter, FastAPI, HTTPException, Query
 from django.conf import settings
+from django.db.models import Q
 from pydantic import BaseModel, HttpUrl
 from datetime import date
 from core.models import Tag, Framework, Version, DocFile, Variant
@@ -65,24 +66,41 @@ def list_tags():
 
 @api_router.get("/frameworks/", response_model=List[FrameworkModel])
 def search_frameworks(name: str = None, tag_ids: List[int] = Query(None)):
-    frameworks = Framework.objects.all()
-    
+    query = Q()
+
     if name:
-        frameworks = frameworks.filter(name__icontains=name)
+        query &= Q(name__icontains=name)
     
     if tag_ids:
-        frameworks = frameworks.filter(tags__id__in=tag_ids).distinct()
+        query &= Q(tags__id__in=tag_ids)
+    
+    frameworks = Framework.objects.filter(query).prefetch_related(
+        'tags', 
+        'version_set__variant_set__docfile_set'
+    )
     
     framework_models = []
     for framework in frameworks:
-        latest_version = framework.version_set.order_by('-id').first()
-        latest_doc_file_url = None
-        if latest_version:
-            latest_variant = latest_version.variant_set.first()
-            if latest_variant:
-                latest_doc_file = latest_variant.docfile_set.first()
-                if latest_doc_file:
-                    latest_doc_file_url = latest_doc_file.get_file_url()
+        versions = []
+        for version in framework.version_set.all():
+            variants = []
+            for variant in version.variant_set.all():
+                doc_files = [
+                    DocFileModel(
+                        file_name=docfile.file_name,
+                        file_url=docfile.get_file_url(),
+                        token_count=docfile.token_count
+                    ) for docfile in variant.docfile_set.all()
+                ]
+                variants.append(VariantModel(
+                    variant_type=variant.get_variant_type_display(),
+                    doc_files=doc_files
+                ))
+            versions.append(VersionModel(
+                version_number=version.version_number,
+                release_date=version.release_date,
+                variants=variants
+            ))
         
         tag_models = [TagModel(id=tag.id, name=tag.name) for tag in framework.tags.all()]
         
@@ -91,8 +109,8 @@ def search_frameworks(name: str = None, tag_ids: List[int] = Query(None)):
             name=framework.name,
             description=framework.description,
             tags=tag_models,
-            latest_version=latest_version.version_number if latest_version else None,
-            latest_doc_file_url=latest_doc_file_url
+            latest_version=versions[-1].version_number if versions else None,
+            latest_doc_file_url=versions[-1].variants[-1].doc_files[-1].file_url if versions and versions[-1].variants and versions[-1].variants[-1].doc_files else None
         )
         framework_models.append(framework_model)
     
