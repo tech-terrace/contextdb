@@ -9,6 +9,7 @@ export interface FrameworkModel {
     description: string;
     latest_version: string | null;
     latest_doc_file_url: string | null;
+    tags: TagModel[];
 }
 
 export interface DocFileModel {
