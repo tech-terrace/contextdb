@@ -94,6 +94,7 @@ fetchFrameworks();
   background-color: var(--header-bg-color); 
   padding: 10px;
   border-radius: 4px;
+  box-sizing: border-box; /* Ensure padding is included in width */
 }
 
 .search-input {
@@ -104,11 +105,14 @@ fetchFrameworks();
   background-color: #222; 
   color: var(--text-active-color); 
   border-radius: 4px;
+  box-sizing: border-box; /* Include padding and border in the element's total width */
 }
 
 .results-list {
   list-style: none;
   margin: 0;
+  margin-top: 5px;
+  margin-left: -10px;
   padding: 0;
   background: #222;
   border: 1px solid var(--link-hover-bg-color); 
@@ -152,8 +156,8 @@ fetchFrameworks();
   flex-wrap: wrap;
   gap: 10px;
   justify-content: center;
-  margin-bottom: 20px;
-  margin-top: 20px;
+  margin-bottom: 10px;
+  margin-top: 10px;
   max-width: 600px; 
   margin-left: auto; 
   margin-right: auto; 
