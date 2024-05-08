@@ -13,9 +13,10 @@
           <div class="framework-name">{{ framework.name }} @ {{ framework.latest_version }}</div>
           <div class="framework-description">{{ framework.description }}</div>
           <div class="framework-icons">
-            <span class="icon-link"><i class="fas fa-link"></i></span>
-            <span class="icon-code"><i class="fas fa-code"></i></span>
-            <span class="icon-download"><i class="fas fa-download"></i></span>
+            <span class="icon-link" @click="copyToClipboard(framework.latest_doc_file_url)" title="Copy Link"><i class="fas fa-link"></i></span>
+            <span class="icon-open-new-tab" @click="openInNewTab(framework.latest_doc_file_url)" title="Open in New Tab"><i class="fas fa-external-link-alt"></i></span>
+            <span class="icon-copy-content" @click="copyUrlContentToClipboard(framework.latest_doc_file_url)" title="Copy Content"><i class="fas fa-copy"></i></span>
+            <span class="icon-download" @click="downloadFile(framework.latest_doc_file_url)" title="Download File"><i class="fas fa-download"></i></span>
           </div>
         </li>
       </ul>
@@ -60,12 +61,56 @@ const toggleTagSelection = (tag: TagModel) => {
   }
 };
 
-const copyToClipboard = async (url: string) => {
+const copyToClipboard = async (url: string | null) => {
   try {
+    if (!url) {
+      return;
+    }
     await navigator.clipboard.writeText(url);
     alert('Link copied to clipboard!');
   } catch (error) {
     console.error('Failed to copy:', error);
+  }
+};
+
+const copyUrlContentToClipboard = async (url: string | null) => {
+  try {
+    if (!url) {
+      return;
+    }
+    const response = await fetch(url);
+    const text = await response.text();
+    await navigator.clipboard.writeText(text);
+    alert('Content copied to clipboard!');
+  } catch (error) {
+    console.error('Failed to copy:', error);
+  }
+};
+
+const openInNewTab = (url: string | null) => {
+  if (url) {
+    window.open(url, '_blank');
+  }
+};
+
+const downloadFile = async (url: string | null) => {
+  if (!url) return;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Network response was not ok.');
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    const name = url.split('/').pop() || 'unknown.txt';
+    link.setAttribute('download', name); 
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(downloadUrl); // Clean up the URL object
+  } catch (error) {
+    console.error('Failed to download file:', error);
   }
 };
 
@@ -133,6 +178,7 @@ fetchFrameworks();
 .framework-name {
   font-weight: bold;
   margin-bottom: 5px;
+  color: var(--active-link-color);
 }
 
 .framework-description {
@@ -148,7 +194,7 @@ fetchFrameworks();
   color: var(--text-active-color); /* Use global variable */
 }
 
-.icon-link i, .icon-code i, .icon-download i {
+.icon-link i, .icon-open-new-tab i, .icon-download i, .icon-copy-content i {
   cursor: pointer;
 }
 .tags-container {
