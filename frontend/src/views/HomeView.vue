@@ -6,15 +6,17 @@
           {{ tag.name }}
         </button>
       </div>
-    <div class="search-container">
+      <div class="search-container">
       <input type="text" v-model="searchTerm" placeholder="Search frameworks..." class="search-input"/>
       <ul v-if="frameworks.length" class="results-list">
         <li v-for="framework in filteredFrameworks" :key="framework.id" class="result-item">
-          <div class="framework-name">{{ framework.name }}</div>
+          <div class="framework-name">{{ framework.name }} @ {{ framework.latest_version }}</div>
           <div class="framework-description">{{ framework.description }}</div>
-          <div class="framework-version">Latest Version: {{ framework.latest_version }}</div>
-          <a :href="framework.latest_doc_file_url" target="_blank" v-if="framework.latest_doc_file_url" class="doc-link-button">Documentation</a>
-          <button @click="copyToClipboard(framework.latest_doc_file_url)" v-if="framework.latest_doc_file_url">Copy Link</button>
+          <div class="framework-icons">
+            <span class="icon-link"><i class="fas fa-link"></i></span>
+            <span class="icon-code"><i class="fas fa-code"></i></span>
+            <span class="icon-download"><i class="fas fa-download"></i></span>
+          </div>
         </li>
       </ul>
     </div>
@@ -86,16 +88,21 @@ fetchFrameworks();
 <style scoped>
 .search-container {
   width: 100%;
-  max-width: 600px;
+  max-width: 800px;
   position: relative;
-  margin: 0 auto; /* Center the search box horizontally */
+  margin: 20px auto; 
+  background-color: var(--header-bg-color); 
+  padding: 10px;
+  border-radius: 4px;
 }
 
 .search-input {
   width: 100%;
   padding: 10px;
   font-size: 16px;
-  border: 1px solid #ccc;
+  border: 2px solid var(--link-hover-bg-color);
+  background-color: #222; 
+  color: var(--text-active-color); 
   border-radius: 4px;
 }
 
@@ -103,10 +110,8 @@ fetchFrameworks();
   list-style: none;
   margin: 0;
   padding: 0;
-  background: white;
-  border: 1px solid #ccc;
-  border-top: none;
-  border-radius: 0 0 4px 4px;
+  background: #222;
+  border: 1px solid var(--link-hover-bg-color); 
   position: absolute;
   width: 100%;
   z-index: 1000;
@@ -114,14 +119,11 @@ fetchFrameworks();
 
 .result-item {
   padding: 10px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--link-hover-bg-color);
+  color: var(--text-active-color);
   display: flex;
   flex-direction: column;
   align-items: start;
-}
-
-.result-item:last-child {
-  border-bottom: none;
 }
 
 .framework-name {
@@ -130,33 +132,50 @@ fetchFrameworks();
 }
 
 .framework-description {
-  color: #666;
+  color: #999;
 }
 
-.doc-link-button {
+.framework-icons {
+  margin-top: 5px;
+}
+
+.framework-icons span {
   margin-right: 10px;
-  padding: 5px 10px;
-  background-color: #007BFF;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  text-decoration: none;
+  color: var(--text-active-color); /* Use global variable */
 }
 
+.icon-link i, .icon-code i, .icon-download i {
+  cursor: pointer;
+}
 .tags-container {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   justify-content: center;
   margin-bottom: 20px;
-  max-width: 600px; /* Match the search container width */
-  margin-left: auto; /* Center align the container */
-  margin-right: auto; /* Center align the container */
+  margin-top: 20px;
+  max-width: 600px; 
+  margin-left: auto; 
+  margin-right: auto; 
+}
+
+button {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+button:hover {
+  background-color: var(--link-hover-bg-color); 
 }
 
 .selected-tag {
-  background-color: #007BFF;
+  background-color: var(--active-link-color);
   color: white;
+  font-weight: bold;
 }
 </style>
