@@ -123,7 +123,7 @@ def get_versions_with_variants_and_docs(tool_id: int):
     except Framework.DoesNotExist:
         raise HTTPException(status_code=404, detail="Framework not found")
 
-    versions = Version.objects.filter(framework=framework).prefetch_related('variant_set__docfile_set').all()
+    versions = Version.objects.filter(framework=framework).prefetch_related('variant_set__docfile_set').order_by('-id')
 
     version_models = []
     for version in versions:
