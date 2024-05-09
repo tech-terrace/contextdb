@@ -23,7 +23,6 @@ google-resumable-media = "2.7.0"
 googleapis-common-protos = "1.63.0"
 greenlet = "3.0.3"
 idna = "3.6"
-playwright = "1.42.0"
 proto-plus = "1.23.0"
 protobuf = "4.25.3"
 pyasn1 = "0.6.0"
@@ -43,7 +42,11 @@ urllib3 = "2.2.1"
 fastapi = "^0.110.0"
 uvicorn = "^0.29.0"
 python-dotenv = "^1.0.1"
-psycopg2 = "^2.9.9"
+psycopg2-binary = "^2.9.9"
+
+
+[tool.poetry.group.dev.dependencies]
+playwright = "1.42.0"
 
 
 [build-system]

@@ -1,0 +1,6 @@
+venv
+.env
+creds.json
+.vscode
+.idea
+__pycache__
