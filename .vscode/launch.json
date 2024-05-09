@@ -50,6 +50,17 @@
             "request": "launch",
             "program": "${workspaceFolder}\\api.py",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Run Frontend",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "dev"
+            ],
+            "cwd": "${workspaceFolder}/frontend"
         }
     ]
 }

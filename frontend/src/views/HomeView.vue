@@ -2,26 +2,34 @@
   <main>
     <div>
       <div class="tags-container">
-        <button v-for="tag in tags" :key="tag.id" :class="{'selected-tag': selectedTags.includes(tag)}" @click="toggleTagSelection(tag)">
+        <button v-for="tag in tags" :key="tag.id" :class="{ 'selected-tag': selectedTags.includes(tag) }"
+          @click="toggleTagSelection(tag)">
           {{ tag.name }}
         </button>
       </div>
       <div class="search-container">
-      <input type="text" v-model="searchTerm" placeholder="Search frameworks..." class="search-input"/>
-      <ul v-if="frameworks.length" class="results-list">
-        <li v-for="framework in filteredFrameworks" :key="framework.id" class="result-item">
-          <div class="framework-name">{{ framework.name }} @ {{ framework.latest_version }}</div>
-          <div class="framework-description">{{ framework.description }}</div>
-          <div class="framework-icons">
-            <span class="icon-link" @click="copyToClipboard(framework.latest_doc_file_url)" title="Copy Link"><i class="fas fa-link"></i></span>
-            <span class="icon-open-new-tab" @click="openInNewTab(framework.latest_doc_file_url)" title="Open in New Tab"><i class="fas fa-external-link-alt"></i></span>
-            <span class="icon-copy-content" @click="copyUrlContentToClipboard(framework.latest_doc_file_url)" title="Copy Content"><i class="fas fa-copy"></i></span>
-            <span class="icon-download" @click="downloadFile(framework.latest_doc_file_url)" title="Download File"><i class="fas fa-download"></i></span>
-          </div>
-        </li>
-      </ul>
+        <input type="text" v-model="searchTerm" placeholder="Search frameworks..." class="search-input" />
+        <ul v-if="frameworks.length" class="results-list">
+          <li v-for="framework in filteredFrameworks" :key="framework.id" class="result-item">
+            <div class="framework-name"
+              @click="clickFramework(framework)">
+              {{ framework.name }} @ {{ framework.latest_version }}
+            </div>
+            <div class="framework-description">{{ framework.description }}</div>
+            <div class="framework-icons">
+              <span class="icon-link" @click="copyToClipboard(framework.latest_doc_file_url)" title="Copy Link"><i
+                  class="fas fa-link"></i></span>
+              <span class="icon-open-new-tab" @click="openInNewTab(framework.latest_doc_file_url)"
+                title="Open in New Tab"><i class="fas fa-external-link-alt"></i></span>
+              <span class="icon-copy-content" @click="copyUrlContentToClipboard(framework.latest_doc_file_url)"
+                title="Copy Content"><i class="fas fa-copy"></i></span>
+              <span class="icon-download" @click="downloadFile(framework.latest_doc_file_url)" title="Download File"><i
+                  class="fas fa-download"></i></span>
+            </div>
+          </li>
+        </ul>
+      </div>
     </div>
-  </div>
 
   </main>
 </template>
@@ -30,11 +38,25 @@
 import { computed, ref } from 'vue';
 import { searchFrameworks, listTags } from '../api/crud';
 import type { FrameworkModel, TagModel } from '../api/interfaces';
+import { copyToClipboard, copyUrlContentToClipboard, openInNewTab, downloadFile } from '../utils';
+import { useAppStore } from '@/stores/app';
+import router from '@/router';
 
 const searchTerm = ref('');
 const frameworks = ref<FrameworkModel[]>([]);
 const tags = ref<TagModel[]>([]);
 const selectedTags = ref<TagModel[]>([]);
+
+
+const appStore = useAppStore();
+
+const clickFramework = (framework: FrameworkModel) => {
+  appStore.frameworkId = framework.id;
+  appStore.frameworkName = framework.name;
+  appStore.frameworkDescription = framework.description;
+
+  router.push({ name: 'tool', params: { toolId: framework.id } });
+}
 
 const fetchFrameworks = async () => {
   try {
@@ -61,59 +83,6 @@ const toggleTagSelection = (tag: TagModel) => {
   }
 };
 
-const copyToClipboard = async (url: string | null) => {
-  try {
-    if (!url) {
-      return;
-    }
-    await navigator.clipboard.writeText(url);
-    alert('Link copied to clipboard!');
-  } catch (error) {
-    console.error('Failed to copy:', error);
-  }
-};
-
-const copyUrlContentToClipboard = async (url: string | null) => {
-  try {
-    if (!url) {
-      return;
-    }
-    const response = await fetch(url);
-    const text = await response.text();
-    await navigator.clipboard.writeText(text);
-    alert('Content copied to clipboard!');
-  } catch (error) {
-    console.error('Failed to copy:', error);
-  }
-};
-
-const openInNewTab = (url: string | null) => {
-  if (url) {
-    window.open(url, '_blank');
-  }
-};
-
-const downloadFile = async (url: string | null) => {
-  if (!url) return;
-
-  try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error('Network response was not ok.');
-    const blob = await response.blob();
-    const downloadUrl = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    const name = url.split('/').pop() || 'unknown.txt';
-    link.setAttribute('download', name); 
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(downloadUrl); // Clean up the URL object
-  } catch (error) {
-    console.error('Failed to download file:', error);
-  }
-};
-
 const filteredFrameworks = computed(() => {
   let filtered = frameworks.value;
   if (searchTerm.value) {
@@ -125,7 +94,6 @@ const filteredFrameworks = computed(() => {
   return filtered;
 });
 
-
 fetchTags();
 fetchFrameworks();
 </script>
@@ -135,11 +103,12 @@ fetchFrameworks();
   width: 100%;
   max-width: 800px;
   position: relative;
-  margin: 20px auto; 
-  background-color: var(--header-bg-color); 
+  margin: 20px auto;
+  background-color: var(--header-bg-color);
   padding: 10px;
   border-radius: 4px;
-  box-sizing: border-box; /* Ensure padding is included in width */
+  box-sizing: border-box;
+  /* Ensure padding is included in width */
 }
 
 .search-input {
@@ -147,10 +116,11 @@ fetchFrameworks();
   padding: 10px;
   font-size: 16px;
   border: 2px solid var(--link-hover-bg-color);
-  background-color: #222; 
-  color: var(--text-active-color); 
+  background-color: #222;
+  color: var(--text-active-color);
   border-radius: 4px;
-  box-sizing: border-box; /* Include padding and border in the element's total width */
+  box-sizing: border-box;
+  /* Include padding and border in the element's total width */
 }
 
 .results-list {
@@ -160,7 +130,7 @@ fetchFrameworks();
   margin-left: -10px;
   padding: 0;
   background: #222;
-  border: 1px solid var(--link-hover-bg-color); 
+  border: 1px solid var(--link-hover-bg-color);
   position: absolute;
   width: 100%;
   z-index: 1000;
@@ -179,6 +149,7 @@ fetchFrameworks();
   font-weight: bold;
   margin-bottom: 5px;
   color: var(--active-link-color);
+  cursor: pointer;
 }
 
 .framework-description {
@@ -191,12 +162,17 @@ fetchFrameworks();
 
 .framework-icons span {
   margin-right: 10px;
-  color: var(--text-active-color); /* Use global variable */
+  color: var(--text-active-color);
+  /* Use global variable */
 }
 
-.icon-link i, .icon-open-new-tab i, .icon-download i, .icon-copy-content i {
+.icon-link i,
+.icon-open-new-tab i,
+.icon-download i,
+.icon-copy-content i {
   cursor: pointer;
 }
+
 .tags-container {
   display: flex;
   flex-wrap: wrap;
@@ -204,9 +180,9 @@ fetchFrameworks();
   justify-content: center;
   margin-bottom: 10px;
   margin-top: 10px;
-  max-width: 600px; 
-  margin-left: auto; 
-  margin-right: auto; 
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 button {
@@ -220,7 +196,7 @@ button {
 }
 
 button:hover {
-  background-color: var(--link-hover-bg-color); 
+  background-color: var(--link-hover-bg-color);
 }
 
 .selected-tag {
@@ -228,4 +204,4 @@ button:hover {
   color: white;
   font-weight: bold;
 }
-</style>
+</style>@/stores/app
