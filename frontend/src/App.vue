@@ -5,6 +5,7 @@ import { RouterLink, RouterView } from 'vue-router'
 <template>
   <header>
       <nav>
+        <h2>ContextDB</h2>
         <RouterLink to="/" active-class="active">Home</RouterLink>
         <RouterLink to="/about" active-class="active">About</RouterLink>
       </nav>
@@ -14,6 +15,13 @@ import { RouterLink, RouterView } from 'vue-router'
 </template>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap');
+
+h2 {
+  font-family: 'Poppins', sans-serif;
+  margin-right: 10px;
+}
+
 header {
   background-color: var(--header-bg-color);
   padding: 10px 20px;

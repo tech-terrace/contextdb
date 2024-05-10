@@ -60,7 +60,8 @@
                 "run",
                 "dev"
             ],
-            "cwd": "${workspaceFolder}/frontend"
+            "cwd": "${workspaceFolder}/frontend",
+            "console": "integratedTerminal"
         }
     ]
 }
