@@ -5,7 +5,7 @@ import { RouterLink, RouterView } from 'vue-router'
 <template>
   <header>
       <nav>
-        <h2>ContextDB</h2>
+        <h2 @click="$router.push('/')">ContextDB</h2>
         <RouterLink to="/" active-class="active">Home</RouterLink>
         <RouterLink to="/about" active-class="active">About</RouterLink>
       </nav>
@@ -20,6 +20,7 @@ import { RouterLink, RouterView } from 'vue-router'
 h2 {
   font-family: 'Poppins', sans-serif;
   margin-right: 10px;
+  cursor: pointer;
 }
 
 header {
