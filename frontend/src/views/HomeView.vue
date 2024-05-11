@@ -39,7 +39,6 @@ import { computed, ref } from 'vue';
 import { searchFrameworks, listTags } from '../api/crud';
 import type { FrameworkModel, TagModel } from '../api/interfaces';
 import { copyToClipboard, copyUrlContentToClipboard, openInNewTab, downloadFile } from '../utils';
-import { useAppStore } from '@/stores/app';
 import router from '@/router';
 
 const searchTerm = ref('');
@@ -48,13 +47,7 @@ const tags = ref<TagModel[]>([]);
 const selectedTags = ref<TagModel[]>([]);
 
 
-const appStore = useAppStore();
-
 const clickFramework = (framework: FrameworkModel) => {
-  appStore.frameworkId = framework.id;
-  appStore.frameworkName = framework.name;
-  appStore.frameworkDescription = framework.description;
-
   router.push({ name: 'tool', params: { toolId: framework.id } });
 }
 

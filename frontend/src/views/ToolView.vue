@@ -1,8 +1,8 @@
 <template>
     <div class="tool-container">
         <button @click="goBack" class="back-button">Back</button>
-        <h1>{{ appStore.frameworkName }}</h1>
-        <p>{{ appStore.frameworkDescription }}</p>
+        <h1>{{ frameworkDetail?.name }}</h1>
+        <p>{{ frameworkDetail?.description }}</p>
         <table class="versions-table">
             <thead>
                 <tr>
@@ -12,11 +12,11 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="version in versions" :key="version.id">
+                <tr v-for="version in frameworkDetail?.versions" :key="version.version_number">
                     <td>{{ version.version_number }}</td>
                     <td>{{ version.release_date }}</td>
-                    <td v-for="variant in version.variants" :key="variant.id">
-                        <div v-for="doc in variant.doc_files" :key="doc.id">
+                    <td v-for="variant in version.variants" :key="variant.variant_type">
+                        <div v-for="doc in variant.doc_files" :key="doc.file_name">
                             <span class="icon-link" @click="copyToClipboard(doc.file_url)" title="Copy Link"><i
                                     class="fas fa-link"></i></span>
                             <span class="icon-open-new-tab" @click="openInNewTab(doc.file_url)"
@@ -33,20 +33,22 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { getVersionsWithVariantsAndDocs } from '../api/crud';
+import { useRouter, useRoute } from 'vue-router';
+import { getFrameworkDetail } from '../api/crud';
+import type { FrameworkDetailModel } from '../api/interfaces';
 import { copyToClipboard, copyUrlContentToClipboard, openInNewTab, downloadFile } from '../utils';
-import { useAppStore } from '@/stores/app';
 
-const appStore = useAppStore();
 
 const router = useRouter();
-const versions = ref([]);
+const route = useRoute();
+const frameworkDetail = ref<FrameworkDetailModel | null>(null);
+
 
 onMounted(async () => {
-    versions.value = await getVersionsWithVariantsAndDocs(appStore.frameworkId);
+    const toolId = +route.params.toolId;
+    frameworkDetail.value = await getFrameworkDetail(toolId);
 });
 
 function goBack() {

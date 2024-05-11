@@ -38,3 +38,9 @@ export interface ValidationError {
 export interface HTTPValidationError {
     detail: ValidationError[];
 }
+
+export interface FrameworkDetailModel {
+    name: string;
+    description: string;
+    versions: VersionModel[];
+}

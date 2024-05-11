@@ -1,4 +1,4 @@
-import type { TagModel, FrameworkModel, VersionModel } from './interfaces';
+import type { TagModel, FrameworkModel, VersionModel, FrameworkDetailModel } from './interfaces';
 
 
 const baseUrl = '/api/v1';
@@ -23,7 +23,7 @@ export const searchFrameworks = async (name?: string, tagIds?: number[]): Promis
     return response.json();
 };
 
-export const getVersionsWithVariantsAndDocs = async (toolId: number): Promise<VersionModel[]> => {
+export const getFrameworkDetail = async (toolId: number): Promise<FrameworkDetailModel> => {
     const response = await fetch(`${baseUrl}/versions/${toolId}/`);
     if (!response.ok) {
         throw new Error('Failed to fetch versions');

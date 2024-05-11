@@ -58,6 +58,12 @@ class VersionModel(BaseModel):
         from_attributes = True
 
 
+class FrameworkDetailModel(BaseModel):
+    name: str
+    description: str
+    versions: List[VersionModel]
+
+
 @api_router.get("/tags/", response_model=List[TagModel])
 def list_tags():
     tags = Tag.objects.all()
@@ -116,7 +122,7 @@ def search_frameworks(name: str = None, tag_ids: List[int] = Query(None)):
     
     return framework_models
 
-@api_router.get("/versions/{tool_id}/", response_model=List[VersionModel])
+@api_router.get("/versions/{tool_id}/", response_model=FrameworkDetailModel)
 def get_versions_with_variants_and_docs(tool_id: int):
     try:
         framework = Framework.objects.get(id=tool_id)
@@ -152,7 +158,11 @@ def get_versions_with_variants_and_docs(tool_id: int):
     if not version_models:
         raise HTTPException(status_code=404, detail="No versions found for the given framework")
 
-    return version_models
+    return FrameworkDetailModel(
+        name=framework.name,
+        description=framework.description,
+        versions=version_models
+    )
 
 app.include_router(api_router)
 
