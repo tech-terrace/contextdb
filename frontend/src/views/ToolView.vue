@@ -30,11 +30,12 @@
                 </tr>
             </tbody>
         </table>
+        <div v-if="loading" class="loading-spinner"></div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { getFrameworkDetail } from '../api/crud';
 import type { FrameworkDetailModel } from '../api/interfaces';
@@ -49,6 +50,10 @@ const frameworkDetail = ref<FrameworkDetailModel | null>(null);
 onMounted(async () => {
     const toolId = +route.params.toolId;
     frameworkDetail.value = await getFrameworkDetail(toolId);
+});
+
+const loading = computed(() => {
+  return frameworkDetail.value === null;
 });
 
 function goBack() {

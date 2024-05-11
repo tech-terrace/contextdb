@@ -11,8 +11,7 @@
         <input type="text" v-model="searchTerm" placeholder="Search frameworks..." class="search-input" />
         <ul v-if="frameworks.length" class="results-list">
           <li v-for="framework in filteredFrameworks" :key="framework.id" class="result-item">
-            <div class="framework-name"
-              @click="clickFramework(framework)">
+            <div class="framework-name" @click="clickFramework(framework)">
               {{ framework.name }} @ {{ framework.latest_version }}
             </div>
             <div class="framework-description">{{ framework.description }}</div>
@@ -29,6 +28,7 @@
           </li>
         </ul>
       </div>
+      <div v-if="loading" class="loading-spinner"></div>
     </div>
 
   </main>
@@ -58,6 +58,10 @@ const fetchFrameworks = async () => {
     console.error('Error fetching frameworks:', error);
   }
 };
+
+const loading = computed(() => {
+  return frameworks.value.length === 0 || tags.value.length === 0;
+});
 
 const fetchTags = async () => {
   try {
