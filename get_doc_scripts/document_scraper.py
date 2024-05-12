@@ -46,6 +46,9 @@ class DocumentationScraper:
     
     def _skip_iteration(self, link):
         return False
+    
+    def _href_list(self, links):
+        return [link.evaluate("element => element.href") for link in links]
 
     def navigate_and_extract(self):
         self.page.goto(self.base_url)
@@ -54,13 +57,14 @@ class DocumentationScraper:
         self.file_name = f"{self.file_prefix}@{self.version}_large.txt"
         open(self.file_name, "w").close()  # Clear the file
 
-        for link in links:
+        for link in self._href_list(links):
             if self._break_iteration(link):
                 break
             if self._skip_iteration(link):
                 continue
-            link.evaluate("element => element.click()")
-            time.sleep(0.5)
+            # link.evaluate("element => element.click()")
+            self.page.goto(link)  # we go with goto approach because it works for both SPA and non-SPA. it's a bit slower, but still
+            time.sleep(1)
             main_content = self.page.query_selector("main").inner_text()
             with open(self.file_name, "a", encoding="utf-8") as file:
                 file.write(main_content + "\n\n")
@@ -76,7 +80,7 @@ class DocumentationScraper:
 
         if exists:
             print(f"Version {self.version} already exists for {self.name}")
-            # return
+            return
 
         with sync_playwright() as playwright:
             self.setup_browser(playwright)

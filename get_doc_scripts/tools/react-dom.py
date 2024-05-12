@@ -10,8 +10,7 @@ class ReactDomDocumentationScraper(DocumentationScraper):
                          repo="react")
 
     def _skip_iteration(self, link):
-        href = link.get_attribute("href")
-        return '/react-dom' not in href
+        return '/react-dom' not in link
 
 if __name__ == "__main__":
     scraper = ReactDomDocumentationScraper()
