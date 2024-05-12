@@ -8,6 +8,7 @@
                 <tr>
                     <th>Version</th>
                     <th>Date</th>
+                    <th>Token Count (GPT-4)</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -15,6 +16,7 @@
                 <tr v-for="version in frameworkDetail?.versions" :key="version.version_number">
                     <td>{{ version.version_number }}</td>
                     <td>{{ version.release_date }}</td>
+                    <td>{{ version.variants[0].doc_files[0].token_count }}</td>
                     <td v-for="variant in version.variants" :key="variant.variant_type">
                         <div v-for="doc in variant.doc_files" :key="doc.file_name">
                             <span class="icon-link" @click="copyToClipboard(doc.file_url)" title="Copy Link"><i
@@ -57,7 +59,7 @@ const loading = computed(() => {
 });
 
 function goBack() {
-  router.back();
+  router.push('/');
 }
 </script>
 
