@@ -35,11 +35,13 @@ class DocumentationScraper:
             "X-GitHub-Api-Version": "2022-11-28"
         }
         response = requests.get(url, headers=headers)
-        response.raise_for_status()  # Raises an HTTPError for bad responses
+        response.raise_for_status()
         releases = response.json()
-        if releases:
-            self.version = releases[0]['tag_name'].replace("v", "")
-            self.release_date = dt.datetime.strptime(releases[0]['published_at'], "%Y-%m-%dT%H:%M:%SZ").date()
+        for release in releases:
+            if "rc" not in release['tag_name'].lower():  # Skip release candidates
+                self.version = release['tag_name'].replace("v", "")
+                self.release_date = dt.datetime.strptime(release['published_at'], "%Y-%m-%dT%H:%M:%SZ").date()
+                break
     
     def _break_iteration(self, link):
         return False
