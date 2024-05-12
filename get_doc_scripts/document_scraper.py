@@ -1,4 +1,6 @@
 import os
+import shutil
+import stat
 import time
 import requests
 import datetime as dt
@@ -10,23 +12,14 @@ django.setup()
 
 from core.models import add_docfile, version_exists
 
-class DocumentationScraper:
-    def __init__(self, name, base_url, container_selector, file_prefix, owner=None, repo=None):
+
+class BaseDocumentationScraper:
+    def __init__(self, name, file_prefix, owner=None, repo=None):
         self.name = name
-        self.base_url = base_url
-        self.container_selector = container_selector
         self.file_prefix = file_prefix
-        self.file_name = None
-        self.version = None
         self.owner = owner
         self.repo = repo
-        self.release_date = None
-
-    def setup_browser(self, playwright):
-        self.browser = playwright.chromium.launch(headless=False)
-        self.context = self.browser.new_context()
-        self.page = self.context.new_page()
-
+    
     def fetch_version(self):
         url = f"https://api.github.com/repos/{self.owner}/{self.repo}/releases"
         headers = {
@@ -42,6 +35,43 @@ class DocumentationScraper:
                 self.version = release['tag_name'].replace("v", "")
                 self.release_date = dt.datetime.strptime(release['published_at'], "%Y-%m-%dT%H:%M:%SZ").date()
                 break
+    
+    def _run_extraction(self):
+        raise NotImplementedError
+
+    def run(self):
+        self.fetch_version()
+
+        exists = version_exists(self.name, self.version)
+
+        if exists:
+            print(f"Version {self.version} already exists for {self.name}")
+            return
+
+        self._run_extraction()
+        
+        file_bytes = open(self.file_name, "rb")
+        add_docfile(self.name, self.version, "L", self.file_name, file_bytes, self.release_date)
+
+        file_bytes.close()
+        # remove the file
+        os.remove(self.file_name)
+
+
+class DocumentationScraper(BaseDocumentationScraper):
+    def __init__(self, name, base_url, container_selector, file_prefix, owner=None, repo=None):
+        super().__init__(name, file_prefix, owner, repo)
+        self.base_url = base_url
+        self.container_selector = container_selector
+        self.file_name = None
+        self.version = None
+        self.release_date = None
+
+    def setup_browser(self, playwright):
+        self.browser = playwright.chromium.launch(headless=False)
+        self.context = self.browser.new_context()
+        self.page = self.context.new_page()
+
     
     def _break_iteration(self, link):
         return False
@@ -75,24 +105,45 @@ class DocumentationScraper:
         self.context.close()
         self.browser.close()
 
-    def run(self):
-        self.fetch_version()
-
-        exists = version_exists(self.name, self.version)
-
-        if exists:
-            print(f"Version {self.version} already exists for {self.name}")
-            return
-
+    def _run_extraction(self):
         with sync_playwright() as playwright:
             self.setup_browser(playwright)
             self.navigate_and_extract()
             self.close_browser()
-        
-        file_bytes = open(self.file_name, "rb")
-        add_docfile(self.name, self.version, "L", self.file_name, file_bytes, self.release_date)
+    
 
-        file_bytes.close()
-        # remove the file
-        os.remove(self.file_name)
+class GitHubDocumentationScraper(BaseDocumentationScraper):
+    def __init__(self, name, file_prefix, owner=None, repo=None, extensions=["md", "rst"], docs_folder="docs"):
+        super().__init__(name, file_prefix, owner, repo)
+        self.extensions = extensions
+        self.docs_folder = docs_folder
+    
+    def _clone_repo(self):
+        os.system(f"git clone --depth 1 https://github.com/{self.owner}/{self.repo}.git temp_repo")
+    
+    def _concatenate_files_recursively(self):
+        self.file_name = f"{self.file_prefix}@{self.version}_large.txt"
+        with open(self.file_name, 'w', encoding='utf-8') as outfile:
+            for extension in self.extensions:
+                for root, dirs, files in os.walk(f"temp_repo/{self.docs_folder}"):
+                    for file in files:
+                        if file.endswith(extension):
+                            with open(os.path.join(root, file), 'r', encoding='utf-8') as infile:
+                                outfile.write(infile.read() + "\n\n")
+    
+    def _run_extraction(self):
+        self._clone_repo()
+        self._concatenate_files_recursively()
+
+            # Ensure all files are not read-only
+        for root, dirs, files in os.walk('temp_repo', topdown=False):
+            for name in files:
+                filepath = os.path.join(root, name)
+                os.chmod(filepath, stat.S_IWUSR)
+            for name in dirs:
+                os.chmod(os.path.join(root, name), stat.S_IWUSR)
+        
+        shutil.rmtree('temp_repo')
+
+
 
