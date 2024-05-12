@@ -64,7 +64,7 @@ class DocumentationScraper:
                 continue
             # link.evaluate("element => element.click()")
             self.page.goto(link)  # we go with goto approach because it works for both SPA and non-SPA. it's a bit slower, but still
-            time.sleep(1)
+            self.page.wait_for_selector("main")
             main_content = self.page.query_selector("main").inner_text()
             with open(self.file_name, "a", encoding="utf-8") as file:
                 file.write(main_content + "\n\n")
