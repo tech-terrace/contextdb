@@ -89,9 +89,9 @@ class DocFile(models.Model):
         return None
 
 
-def add_docfile(framework_name, version_number, variant_type, file_name, file):
+def add_docfile(framework_name, version_number, variant_type, file_name, file, release_date=None):
     framework = Framework.objects.get(name=framework_name)
-    version, created = Version.objects.get_or_create(framework=framework, version_number=version_number)
+    version, created = Version.objects.get_or_create(framework=framework, version_number=version_number, release_date=release_date)
     variant, created = Variant.objects.get_or_create(version=version, variant_type=variant_type)
     try:
         existing_file = DocFile.objects.get(file_name=file_name, variant=variant)
