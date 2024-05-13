@@ -45,6 +45,13 @@
             "justMyCode": true
         },
         {
+            "name": "Run All Doc Scripts",
+            "type": "python",
+            "request": "launch",
+            "module": "get_doc_scripts.run_all",
+            "justMyCode": true
+        },
+        {
             "name": "FastAPI: Run API",
             "type": "python",
             "request": "launch",
