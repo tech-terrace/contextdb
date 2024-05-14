@@ -59,13 +59,14 @@ class BaseDocumentationScraper:
 
 
 class DocumentationScraper(BaseDocumentationScraper):
-    def __init__(self, name, base_url, container_selector, file_prefix, owner=None, repo=None):
+    def __init__(self, name, base_url, container_selector, file_prefix, owner=None, repo=None, content_selector="main"):
         super().__init__(name, file_prefix, owner, repo)
         self.base_url = base_url
         self.container_selector = container_selector
         self.file_name = None
         self.version = None
         self.release_date = None
+        self.content_selector = content_selector
 
     def setup_browser(self, playwright):
         self.browser = playwright.chromium.launch(headless=False)
@@ -96,8 +97,8 @@ class DocumentationScraper(BaseDocumentationScraper):
                 continue
             # link.evaluate("element => element.click()")
             self.page.goto(link)  # we go with goto approach because it works for both SPA and non-SPA. it's a bit slower, but still
-            self.page.wait_for_selector("main")
-            main_content = self.page.query_selector("main").inner_text()
+            self.page.wait_for_selector(self.content_selector)
+            main_content = self.page.query_selector(self.content_selector).inner_text()
             with open(self.file_name, "a", encoding="utf-8") as file:
                 file.write(main_content + "\n\n")
 
