@@ -32,6 +32,7 @@ class DjangoDocumentationScraper(GitHubDocumentationScraper):
         response.raise_for_status()
         commit = response.json()
         self.release_date = dt.datetime.strptime(commit['commit']['committer']['date'], "%Y-%m-%dT%H:%M:%SZ").date()
+        self._set_file_name()
 
 
 scraper = DjangoDocumentationScraper("Django", "django", owner="django", repo="django", extensions=["txt"])

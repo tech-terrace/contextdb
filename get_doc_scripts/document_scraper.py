@@ -20,6 +20,9 @@ class BaseDocumentationScraper:
         self.file_prefix = file_prefix
         self.owner = owner
         self.repo = repo
+
+    def _set_file_name(self):
+        self.file_name = f"{self.file_prefix}@{self.version}_large.txt"
     
     def fetch_version(self):
         url = f"https://api.github.com/repos/{self.owner}/{self.repo}/releases"
@@ -36,6 +39,7 @@ class BaseDocumentationScraper:
                 self.version = release['tag_name'].replace("v", "")
                 self.release_date = dt.datetime.strptime(release['published_at'], "%Y-%m-%dT%H:%M:%SZ").date()
                 break
+        self._set_file_name()
     
     def _run_extraction(self):
         raise NotImplementedError
@@ -88,7 +92,6 @@ class DocumentationScraper(BaseDocumentationScraper):
         self.page.goto(self.base_url)
         self.page.wait_for_selector(self.container_selector)
         links = self.page.query_selector_all(f"{self.container_selector} a")
-        self.file_name = f"{self.file_prefix}@{self.version}_large.txt"
         open(self.file_name, "w").close()  # Clear the file
         href_list = self._href_list(links)
 
@@ -129,7 +132,6 @@ class GitHubDocumentationScraper(BaseDocumentationScraper):
         os.system(f"git clone --depth 1 https://github.com/{self.owner}/{self.repo}.git temp_repo")
     
     def _concatenate_files_recursively(self):
-        self.file_name = f"{self.file_prefix}@{self.version}_large.txt"
         with open(self.file_name, 'w', encoding='utf-8') as outfile:
             for extension in self.extensions:
                 for root, dirs, files in os.walk(f"temp_repo/{self.docs_folder}"):
