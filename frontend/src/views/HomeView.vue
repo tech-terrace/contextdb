@@ -8,7 +8,7 @@
         </button>
       </div>
       <div class="search-container">
-        <input type="text" v-model="searchTerm" placeholder="Search frameworks..." class="search-input" />
+        <input type="text" v-model="searchTerm" :placeholder="`Search from ${frameworks.length} frameworks...`" class="search-input" />
         <ul v-if="frameworks.length" class="results-list">
           <li v-for="framework in filteredFrameworks" :key="framework.id" class="result-item">
             <div class="framework-name" @click="clickFramework(framework)">
