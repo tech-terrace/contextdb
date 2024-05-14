@@ -6,6 +6,7 @@ import requests
 import datetime as dt
 import django
 from playwright.sync_api import Playwright, sync_playwright
+from playwright._impl._errors import TimeoutError
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'contextdb.settings')
 django.setup()
@@ -89,18 +90,23 @@ class DocumentationScraper(BaseDocumentationScraper):
         links = self.page.query_selector_all(f"{self.container_selector} a")
         self.file_name = f"{self.file_prefix}@{self.version}_large.txt"
         open(self.file_name, "w").close()  # Clear the file
+        href_list = self._href_list(links)
 
-        for link in self._href_list(links):
+        for link in href_list:
             if self._break_iteration(link):
                 break
             if self._skip_iteration(link):
                 continue
             # link.evaluate("element => element.click()")
             self.page.goto(link)  # we go with goto approach because it works for both SPA and non-SPA. it's a bit slower, but still
-            self.page.wait_for_selector(self.content_selector)
-            main_content = self.page.query_selector(self.content_selector).inner_text()
-            with open(self.file_name, "a", encoding="utf-8") as file:
-                file.write(main_content + "\n\n")
+            try:
+                self.page.wait_for_selector(self.content_selector, timeout=5000)
+                main_content = self.page.query_selector(self.content_selector).inner_text()
+                with open(self.file_name, "a", encoding="utf-8") as file:
+                    file.write(main_content + "\n\n")
+            except TimeoutError:
+                print(f"Timeout error for {link}")
+                continue
 
     def close_browser(self):
         self.context.close()
