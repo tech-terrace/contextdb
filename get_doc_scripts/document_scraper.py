@@ -112,8 +112,11 @@ class DocumentationScraper(BaseDocumentationScraper):
                 continue
 
     def close_browser(self):
-        self.context.close()
-        self.browser.close()
+        try:
+            self.context.close()
+            self.browser.close()
+        except Exception as e:
+            ...
 
     def _run_extraction(self):
         with sync_playwright() as playwright:
