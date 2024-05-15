@@ -11,7 +11,12 @@ from core.models import Tag, Framework, Version, DocFile, Variant
 from typing import List, Optional
 
 
-app = FastAPI()
+app = FastAPI(
+    title="ContextDB API",
+    description="API for ContextDB",
+    version="0.1",
+    servers=[{"url": "https://ctxtdb.tech-terrace.org/", "description": "Production"}]
+)
 api_router = APIRouter(prefix="/api/v1")
 
 class TagModel(BaseModel):
