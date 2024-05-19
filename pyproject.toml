@@ -46,6 +46,7 @@ psycopg2-binary = "^2.9.9"
 ebooklib = "^0.18"
 beautifulsoup4 = "^4.12.3"
 pymupdf = "^1.24.3"
+chromadb = "^0.5.0"
 
 
 [tool.poetry.group.dev.dependencies]

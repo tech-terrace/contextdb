@@ -1,5 +1,7 @@
 import os
 import django
+
+from core.embed import get_embedding
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'contextdb.settings')
 django.setup()
 from fastapi import APIRouter, FastAPI, HTTPException, Query
@@ -15,7 +17,8 @@ app = FastAPI(
     title="ContextDB API",
     description="API for ContextDB",
     version="0.1",
-    servers=[{"url": "https://ctxtdb.tech-terrace.org/", "description": "Production"}]
+    servers=[{"url": "https://ctxtdb.tech-terrace.org/", "description": "Production"},
+             {"url": "http://localhost:8001/", "description": "Local"}]
 )
 api_router = APIRouter(prefix="/api/v1")
 
@@ -168,6 +171,13 @@ def get_versions_with_variants_and_docs(tool_id: int):
         description=framework.description,
         versions=version_models
     )
+
+
+@api_router.get('/embeddings/')
+def get_embeddings(url: str, query: str, num_of_results: int = 10) -> list[str]:
+    res = get_embedding(url, query, num_of_results)
+    return res
+
 
 app.include_router(api_router)
 
