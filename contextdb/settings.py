@@ -123,8 +123,10 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+creds_path_1 = os.path.join(BASE_DIR, 'creds.json')
+creds_path_2 = os.path.join(BASE_DIR, 'chroma', 'creds.json')
 GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
-    os.path.join(BASE_DIR, 'creds.json')
+    creds_path_1 if os.path.exists(creds_path_1) else creds_path_2
 )
 
 GS_BUCKET_NAME = 'contextdb'
