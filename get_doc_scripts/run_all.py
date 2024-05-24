@@ -5,4 +5,7 @@ from get_doc_scripts import tools
 for importer, modname, ispkg in pkgutil.iter_modules(tools.__path__, tools.__name__ + '.'):
     module = __import__(modname, fromlist="dummy")
     if hasattr(module, 'scraper'):
-        module.scraper.run()
+        try:
+            module.scraper.run()
+        except Exception as e:
+            print(f"Error running {modname}: {e}")
