@@ -35,7 +35,7 @@ class BaseDocumentationScraper:
         response.raise_for_status()
         releases = response.json()
         for release in releases:
-            if "rc" not in release['tag_name'].lower() and "preview" not in release['tag_name'].lower():  # Skip release candidates
+            if "rc" not in release['tag_name'].lower() and "preview" not in release['tag_name'].lower() and "next" not in release['tag_name'].lower():  # Skip release candidates
                 self.version = release['tag_name'].replace("v", "")
                 self.release_date = dt.datetime.strptime(release['published_at'], "%Y-%m-%dT%H:%M:%SZ").date()
                 break
