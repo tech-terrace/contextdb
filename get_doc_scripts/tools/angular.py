@@ -10,7 +10,8 @@ scraper = AngularDocumentationScraper("Angular", "https://angular.io/docs",
                          "body > aio-shell > mat-sidenav-container > mat-sidenav > div > aio-nav-menu > nav", 
                          "angular", 
                          owner="angular", 
-                         repo="angular")
+                         repo="angular",
+                         browser="firefox")
    
 
 if __name__ == "__main__":
