@@ -34,9 +34,11 @@ class BaseDocumentationScraper:
         response = requests.get(url, headers=headers)
         response.raise_for_status()
         releases = response.json()
+        version_pattern = re.compile(r'^(?:\w+@|v)?(\d+\.\d+\.\d+(?:\.\d+)?)$')
         for release in releases:
-            if re.match(r'^v\d+\.\d+\.\d+(\.\d+)?$', release['tag_name']) or re.match(r'^\d+\.\d+\.\d+(\.\d+)?$', release['tag_name']):
-                self.version = release['tag_name'].replace("v", "")
+            match = version_pattern.match(release['tag_name'])
+            if match:
+                self.version = match.group(1)
                 self.release_date = dt.datetime.strptime(release['published_at'], "%Y-%m-%dT%H:%M:%SZ").date()
                 break
         self._set_file_name()
