@@ -3,15 +3,15 @@ from get_doc_scripts.document_scraper import DocumentationScraper
 
 class AngularDocumentationScraper(DocumentationScraper):
     def _break_iteration(self, link):
-        return "contributors guide" in link
+        return "angularfire" in link
 
 
-scraper = AngularDocumentationScraper("Angular", "https://angular.io/docs", 
-                         "body > aio-shell > mat-sidenav-container > mat-sidenav > div > aio-nav-menu > nav", 
+scraper = AngularDocumentationScraper("Angular", "https://angular.dev/overview", 
+                         "#secondaryNav", 
                          "angular", 
+                         content_selector='docs-docs',
                          owner="angular", 
-                         repo="angular",
-                         browser="firefox")
+                         repo="angular")
    
 
 if __name__ == "__main__":
