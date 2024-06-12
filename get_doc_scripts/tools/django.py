@@ -1,3 +1,4 @@
+import re
 import requests
 import os
 import datetime as dt
@@ -20,7 +21,8 @@ class DjangoDocumentationScraper(GitHubDocumentationScraper):
         for tag in tags:
             try:
                 parsed_version = version.parse(tag['name'])
-                valid_tags.append((parsed_version, tag))
+                if re.match(r'^\d+\.\d+\.\d+(\.\d+)?$', tag['name']):
+                    valid_tags.append((parsed_version, tag))
             except ValueError:
                 continue  # Ignore tags that cannot be parsed
         valid_tags.sort(reverse=True)  # Sort by parsed version
