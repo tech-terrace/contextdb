@@ -2,6 +2,7 @@ from django.db import models
 from django.core.files import File
 import tiktoken
 from storages.backends.gcloud import GoogleCloudStorage
+from packaging import version
 
 class Tag(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -104,20 +105,24 @@ def add_docfile(framework_name, version_number, variant_type, file_name, file, r
     DocFile.objects.create(variant=variant, file_name=file_name, file=django_file)
 
 
-def version_exists(framework_name, version_number):
+def version_exists(framework_name: str, version_number: str) -> bool:
     """
-    Checks if the version of a given framework already exists.
+    Check if a version with the same major and minor numbers already exists for a given framework.
 
     Args:
-        framework_name: The name of the framework.
-        version_number: The version number to check for.
+        framework_name (str): The name of the framework to check.
+        version_number (str): The version number to check.
 
     Returns:
-        True if the version exists, False otherwise.
+        bool: True if a version with the same major and minor numbers exists, False otherwise.
     """
     framework = Framework.objects.get(name=framework_name)
-    try:
-        Version.objects.get(framework=framework, version_number=version_number)
-        return True
-    except Version.DoesNotExist:
-        return False
+    new_version = version.parse(version_number)
+    
+    existing_versions = Version.objects.filter(framework=framework)
+    for existing_version in existing_versions:
+        existing_ver = version.parse(existing_version.version_number)
+        
+        if existing_ver.major == new_version.major and existing_ver.minor == new_version.minor:
+            return True
+    return False
