@@ -1,11 +1,13 @@
-import chromadb
 import requests
 from fastapi import HTTPException
 
-client = chromadb.PersistentClient(path="chroma")
 
 
 def get_embedding(url: str, query: str, num_of_results: int = 10) -> list[str]:
+    import chromadb
+    
+    client = chromadb.PersistentClient(path="chroma")
+    
     # example of url https://storage.googleapis.com/contextdb/docfiles/fast-api0.111.0_large.txt"
     if 'https://storage.googleapis.com/contextdb/docfiles/' not in url:
         raise HTTPException(status_code=400, detail="Invalid URL")
