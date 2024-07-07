@@ -30,3 +30,17 @@ export const getFrameworkDetail = async (toolId: number): Promise<FrameworkDetai
     }
     return response.json();
 };
+
+export const getEmbeddings = async (url: string, query: string, numOfResults: number = 10): Promise<string[]> => {
+  const params = new URLSearchParams({
+    url,
+    query,
+    num_of_results: numOfResults.toString(),
+  });
+
+  const response = await fetch(`${baseUrl}/embeddings/?${params.toString()}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch embeddings');
+  }
+  return response.json();
+};

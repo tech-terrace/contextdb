@@ -27,12 +27,22 @@
                                 title="Copy Content"><i class="fas fa-copy"></i></span>
                             <span class="icon-download" @click="downloadFile(doc.file_url)" title="Download File"><i
                                     class="fas fa-download"></i></span>
+                            <span class="icon-embeddings" @click="openEmbeddingsModal(doc.file_url)" title="Get Embeddings">
+                                <i class="fas fa-brain"></i>
+                            </span>
                         </div>
                     </td>
                 </tr>
             </tbody>
         </table>
         <div v-if="loading" class="loading-spinner"></div>
+
+        <EmbeddingsModal
+            :show="showEmbeddingsModal"
+            :document-url="selectedDocumentUrl"
+            @close="closeEmbeddingsModal"
+            @submit="handleEmbeddingsResult"
+        />
     </div>
 </template>
 
@@ -42,12 +52,11 @@ import { useRouter, useRoute } from 'vue-router';
 import { getFrameworkDetail } from '../api/crud';
 import type { FrameworkDetailModel } from '../api/interfaces';
 import { copyToClipboard, copyUrlContentToClipboard, openInNewTab, downloadFile } from '../utils';
-
+import EmbeddingsModal from '../components/EmbeddingsModal.vue';
 
 const router = useRouter();
 const route = useRoute();
 const frameworkDetail = ref<FrameworkDetailModel | null>(null);
-
 
 onMounted(async () => {
     const toolId = +route.params.toolId;
@@ -60,6 +69,25 @@ const loading = computed(() => {
 
 function goBack() {
   router.push('/');
+}
+
+const showEmbeddingsModal = ref(false);
+const selectedDocumentUrl = ref('');
+const embeddingsResult = ref<string[]>([]);
+
+function openEmbeddingsModal(fileUrl: string) {
+  selectedDocumentUrl.value = fileUrl;
+  showEmbeddingsModal.value = true;
+}
+
+function closeEmbeddingsModal() {
+  showEmbeddingsModal.value = false;
+  selectedDocumentUrl.value = '';
+}
+
+function handleEmbeddingsResult(results: string[]) {
+  embeddingsResult.value = results;
+  // You can do something with the results here, like displaying them in the main view
 }
 </script>
 
@@ -92,7 +120,8 @@ function goBack() {
 .icon-link i,
 .icon-open-new-tab i,
 .icon-download i,
-.icon-copy-content i {
+.icon-copy-content i,
+.icon-embeddings i {
     cursor: pointer;
     margin-right: 10px;
 }
@@ -112,5 +141,13 @@ function goBack() {
 .back-button:hover {
   background-color: var(--link-hover-bg-color); /* Hover background */
   color: white; /* Hover text color */
+}
+
+.icon-embeddings i {
+  color: var(--text-active-color);
+}
+
+.icon-embeddings i:hover {
+  color: var(--link-hover-bg-color);
 }
 </style>
