@@ -24,11 +24,21 @@
                 title="Copy Content"><i class="fas fa-copy"></i></span>
               <span class="icon-download" @click="downloadFile(framework.latest_doc_file_url)" title="Download File"><i
                   class="fas fa-download"></i></span>
+              <span class="icon-embeddings" @click="openEmbeddingsModal(framework.latest_doc_file_url)" title="Get Embeddings">
+                <i class="fas fa-brain"></i>
+              </span>
             </div>
           </li>
         </ul>
       </div>
       <div v-if="loading" class="loading-spinner"></div>
+
+      <EmbeddingsModal
+        :show="showEmbeddingsModal"
+        :document-url="selectedDocumentUrl"
+        @close="closeEmbeddingsModal"
+        @submit="handleEmbeddingsResult"
+      />
     </div>
 
   </main>
@@ -40,12 +50,16 @@ import { searchFrameworks, listTags } from '../api/crud';
 import type { FrameworkModel, TagModel } from '../api/interfaces';
 import { copyToClipboard, copyUrlContentToClipboard, openInNewTab, downloadFile } from '../utils';
 import router from '@/router';
+import EmbeddingsModal from '../components/EmbeddingsModal.vue';
 
 const searchTerm = ref('');
 const frameworks = ref<FrameworkModel[]>([]);
 const tags = ref<TagModel[]>([]);
 const selectedTags = ref<TagModel[]>([]);
 
+const showEmbeddingsModal = ref(false);
+const selectedDocumentUrl = ref('');
+const embeddingsResult = ref<string[]>([]);
 
 const clickFramework = (framework: FrameworkModel) => {
   router.push({ name: 'tool', params: { toolId: framework.id } });
@@ -90,6 +104,21 @@ const filteredFrameworks = computed(() => {
   });
   return filtered;
 });
+
+function openEmbeddingsModal(fileUrl: string) {
+  selectedDocumentUrl.value = fileUrl;
+  showEmbeddingsModal.value = true;
+}
+
+function closeEmbeddingsModal() {
+  showEmbeddingsModal.value = false;
+  selectedDocumentUrl.value = '';
+}
+
+function handleEmbeddingsResult(results: string[]) {
+  embeddingsResult.value = results;
+  // You can do something with the results here, like displaying them in the main view
+}
 
 fetchTags();
 fetchFrameworks();
@@ -166,8 +195,13 @@ fetchFrameworks();
 .icon-link i,
 .icon-open-new-tab i,
 .icon-download i,
-.icon-copy-content i {
+.icon-copy-content i,
+.icon-embeddings i {
   cursor: pointer;
+}
+
+.icon-embeddings i:hover {
+  color: var(--link-hover-bg-color);
 }
 
 .tags-container {
@@ -201,4 +235,8 @@ button:hover {
   color: white;
   font-weight: bold;
 }
-</style>@/stores/app
+
+::v-deep(.modal) {
+  z-index: 1001;
+}
+</style>
