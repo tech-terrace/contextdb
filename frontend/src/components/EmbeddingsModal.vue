@@ -11,6 +11,7 @@
             <li v-for="(item, index) in result" :key="index">{{ item }}</li>
           </ul>
         </div>
+        <div v-if="loading" class="loading-spinner"></div>
       </div>
     </div>
   </template>
@@ -31,17 +32,22 @@
   
   const query = ref('');
   const result = ref<string[]>([]);
+  const loading = ref(false);
   
   watch(() => props.show, (newValue) => {
     if (!newValue) {
       query.value = '';
       result.value = [];
+      loading.value = false;
     }
   });
   
   async function submitQuery() {
     if (!query.value) return;
   
+    loading.value = true;
+    result.value = [];
+
     try {
       const results = await getEmbeddings(props.documentUrl, query.value);
       result.value = results;
@@ -49,6 +55,8 @@
     } catch (error) {
       console.error('Error fetching embeddings:', error);
       // You might want to show an error message to the user here
+    } finally {
+      loading.value = false;
     }
   }
   
