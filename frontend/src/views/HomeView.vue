@@ -24,7 +24,7 @@
                 title="Copy Content"><i class="fas fa-copy"></i></span>
               <span class="icon-download" @click="downloadFile(framework.latest_doc_file_url)" title="Download File"><i
                   class="fas fa-download"></i></span>
-              <span class="icon-embeddings" @click="openEmbeddingsModal(framework.latest_doc_file_url)" title="Get Embeddings">
+              <span class="icon-embeddings" @click="framework.latest_doc_file_url && openEmbeddingsModal(framework.latest_doc_file_url)" title="Get Embeddings">
                 <i class="fas fa-brain"></i>
               </span>
             </div>
