@@ -17,7 +17,7 @@ app = FastAPI(
     title="ContextDB API",
     description="API for ContextDB",
     version="0.1",
-    servers=[{"url": "https://ctxtdb.tech-terrace.org/", "description": "Production"},
+    servers=[{"url": "https://context-db.com/", "description": "Production"},
              {"url": "http://localhost:8001/", "description": "Local"}]
 )
 api_router = APIRouter(prefix="/api/v1")
