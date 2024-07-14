@@ -39,6 +39,7 @@ nav {
   display: flex;
   justify-content: start;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 nav a {
@@ -71,5 +72,27 @@ nav a.github-link svg {
 
 nav a.github-link:hover svg {
   fill: var(--active-link-color);
+}
+
+@media (max-width: 768px) {
+  nav {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  h1 {
+    margin-bottom: 10px;
+  }
+
+  nav a {
+    width: 100%;
+    padding: 10px 16px;
+    margin-bottom: 5px;
+  }
+
+  nav a.github-link {
+    padding: 10px 16px;
+    justify-content: flex-start;
+  }
 }
 </style>
