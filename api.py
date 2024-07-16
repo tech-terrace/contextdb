@@ -96,7 +96,7 @@ def search_frameworks(name: str = None, tag_ids: List[int] = Query(None)):
     framework_models = []
     for framework in frameworks:
         versions = []
-        for version in framework.version_set.all():
+        for version in framework.version_set.order_by('id').all():
             variants = []
             for variant in version.variant_set.all():
                 doc_files = [

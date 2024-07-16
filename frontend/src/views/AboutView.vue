@@ -2,8 +2,8 @@
   <div class="about">
     <h1>About ContextDB</h1>
     <section>
-      <h2>Overview</h2>
-      <p>ContextDB is a cutting-edge application designed to empower large language models (LLMs) with up-to-date context on various tools and frameworks. By providing the latest information on technologies like React, FastAPI, Vue.js, and more, ContextDB enables LLMs to generate more accurate and relevant responses.</p>
+      <h2>What's ContextDB?</h2>
+      <p>ContextDB is a tool that helps AI models stay up-to-date with the latest info on various programming tools and frameworks. It's like giving these AIs a cheat sheet for tech stuff like React, FastAPI, Vue.js, and more, so they can give you better answers.</p>
     </section>
     <section>
       <h2>Key Features</h2>
