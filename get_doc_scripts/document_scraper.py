@@ -24,24 +24,31 @@ class BaseDocumentationScraper:
     def _set_file_name(self):
         self.file_name = f"{self.file_prefix}@{self.version}_large.txt"
     
-    def fetch_version(self):
+    def fetch_version(self, page=1):
         url = f"https://api.github.com/repos/{self.owner}/{self.repo}/releases"
         headers = {
             "Accept": "application/vnd.github+json",
             "Authorization": f"Bearer {os.getenv('GITHUB_TOKEN')}",
             "X-GitHub-Api-Version": "2022-11-28"
         }
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, params={"per_page": 100, "page": page})
         response.raise_for_status()
         releases = response.json()
         version_pattern = re.compile(r'^(?:\w+@|v)?(\d+\.\d+\.\d+(?:\.\d+)?)$')
+        
         for release in releases:
             match = version_pattern.match(release['tag_name'])
             if match:
                 self.version = match.group(1)
                 self.release_date = dt.datetime.strptime(release['published_at'], "%Y-%m-%dT%H:%M:%SZ").date()
-                break
-        self._set_file_name()
+                self._set_file_name()
+                return
+        
+        # If no version is found and there are more releases, recursively call the next page
+        if releases:
+            self.fetch_version(page + 1)
+        else:
+            raise ValueError(f"No valid version found for {self.owner}/{self.repo}")
     
     def _run_extraction(self):
         raise NotImplementedError
@@ -160,6 +167,5 @@ class GitHubDocumentationScraper(BaseDocumentationScraper):
                 os.chmod(os.path.join(root, name), stat.S_IWUSR)
         
         shutil.rmtree('temp_repo')
-
 
 
