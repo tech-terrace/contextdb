@@ -116,7 +116,7 @@ def version_exists(framework_name: str, version_number: str) -> bool:
     Returns:
         bool: True if a version with the same major and minor numbers exists, False otherwise.
     """
-    framework = Framework.objects.get(name=framework_name)
+    framework, created = Framework.objects.get_or_create(name=framework_name, defaults={'description': ""})
     new_version = version.parse(version_number)
     
     existing_versions = Version.objects.filter(framework=framework)

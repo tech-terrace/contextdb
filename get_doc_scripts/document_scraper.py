@@ -37,7 +37,7 @@ class BaseDocumentationScraper:
         version_pattern = re.compile(r'^(?:\w+@|v)?(\d+\.\d+\.\d+(?:\.\d+)?)$')
         
         for release in releases:
-            match = version_pattern.match(release['tag_name'])
+            match = version_pattern.match(release['tag_name']) or version_pattern.match(release['name'])
             if match:
                 self.version = match.group(1)
                 self.release_date = dt.datetime.strptime(release['published_at'], "%Y-%m-%dT%H:%M:%SZ").date()
