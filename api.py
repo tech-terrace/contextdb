@@ -8,9 +8,11 @@ from fastapi import APIRouter, FastAPI, HTTPException, Query
 from django.conf import settings
 from django.db.models import Q
 from pydantic import BaseModel, HttpUrl
+from packaging import version
 from datetime import date
 from core.models import Tag, Framework, Version, DocFile, Variant
 from typing import List, Optional
+from packaging.version import parse as parse_version
 
 
 app = FastAPI(
@@ -96,7 +98,7 @@ def search_frameworks(name: str = None, tag_ids: List[int] = Query(None)):
     framework_models = []
     for framework in frameworks:
         versions = []
-        for version in framework.version_set.order_by('id').all():
+        for version in framework.version_set.order_by('-id').all():
             variants = []
             for variant in version.variant_set.all():
                 doc_files = [
@@ -116,6 +118,9 @@ def search_frameworks(name: str = None, tag_ids: List[int] = Query(None)):
                 variants=variants
             ))
         
+        # Sort versions by version number in descending order
+        versions.sort(key=lambda x: parse_version(x.version_number), reverse=True)
+        
         tag_models = [TagModel(id=tag.id, name=tag.name) for tag in framework.tags.all()]
         
         framework_model = FrameworkModel(
@@ -123,8 +128,8 @@ def search_frameworks(name: str = None, tag_ids: List[int] = Query(None)):
             name=framework.name,
             description=framework.description,
             tags=tag_models,
-            latest_version=versions[-1].version_number if versions else None,
-            latest_doc_file_url=versions[-1].variants[-1].doc_files[-1].file_url if versions and versions[-1].variants and versions[-1].variants[-1].doc_files else None
+            latest_version=versions[0].version_number if versions else None,
+            latest_doc_file_url=versions[0].variants[0].doc_files[0].file_url if versions and versions[0].variants and versions[0].variants[0].doc_files else None
         )
         framework_models.append(framework_model)
     
@@ -137,12 +142,12 @@ def get_versions_with_variants_and_docs(tool_id: int):
     except Framework.DoesNotExist:
         raise HTTPException(status_code=404, detail="Framework not found")
 
-    versions = Version.objects.filter(framework=framework).prefetch_related('variant_set__docfile_set').order_by('-id')
+    versions = Version.objects.filter(framework=framework).prefetch_related('variant_set__docfile_set')
 
     version_models = []
-    for version in versions:
+    for version_obj in versions:
         variant_models = []
-        for variant in version.variant_set.all():
+        for variant in version_obj.variant_set.all():
             docfile_models = []
             for docfile in variant.docfile_set.all():
                 docfile_model = DocFileModel(
@@ -157,11 +162,14 @@ def get_versions_with_variants_and_docs(tool_id: int):
             )
             variant_models.append(variant_model)
         version_model = VersionModel(
-            version_number=version.version_number,
-            release_date=version.release_date,
+            version_number=version_obj.version_number,
+            release_date=version_obj.release_date,
             variants=variant_models
         )
         version_models.append(version_model)
+
+    # Sort versions by version number in descending order
+    version_models.sort(key=lambda x: version.parse(x.version_number), reverse=True)
 
     if not version_models:
         raise HTTPException(status_code=404, detail="No versions found for the given framework")
